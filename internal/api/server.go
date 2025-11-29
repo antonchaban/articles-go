@@ -3,8 +3,10 @@ package api
 import (
 	"net/http"
 
+	"github.com/antonchaban/articles-go/internal/api/middleware"
 	v1 "github.com/antonchaban/articles-go/internal/api/v1"
 	"github.com/antonchaban/articles-go/internal/config"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -30,13 +32,12 @@ func NewServer(cfg *config.Config, articleHandler *v1.ArticleHandler) *gin.Engin
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	// Initialize Gin engine with default middleware
-	// Default includes Logger (request logging) and Recovery (panic recovery)
-	r := gin.Default()
+	r := gin.New()
 
 	// Apply additional recovery middleware for redundancy
 	// Ensures graceful handling of panics in request handlers
 	r.Use(gin.Recovery())
+	r.Use(middleware.PrometheusMiddleware())
 
 	// Register health check endpoint
 	// Used for liveness probes
@@ -44,11 +45,11 @@ func NewServer(cfg *config.Config, articleHandler *v1.ArticleHandler) *gin.Engin
 		c.JSON(http.StatusOK, gin.H{"status": "alive"})
 	})
 
-	// Create API v1 route group
-	// All v1 endpoints will be prefixed with /api/v1
+	// Expose metrics for Prometheus scraper
+	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
+
 	apiV1 := r.Group("/api/v1")
 	{
-		// Register all article-related routes under /api/v1
 		v1.RegisterRoutes(apiV1, articleHandler)
 	}
 
