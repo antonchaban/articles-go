@@ -1,8 +1,10 @@
 version: '3'
 
 vars:
-  DB_USER: '{{.DB_USER | default "admin"}}'
-  DB_PASSWORD: '{{.DB_PASSWORD | default "admin"}}'
+  DB_USER: '{{.DB_USER | default "postgres"}}'
+  DB_PASSWORD: '{{.DB_PASSWORD | default "password"}}'
+  DB_NAME: '{{.DB_NAME | default "articles"}}'
+  DB_PORT: '{{.DB_PORT | default "5432"}}'
   VERSION: '{{.VERSION}}'
   DOCKER_IMAGE_NAME: "antohachaban/articles-go:{{.VERSION}}"
 
@@ -48,6 +50,11 @@ tasks:
     cmds:
       - go test ./...
     desc: Run all tests
+
+  run-postgres:
+    cmds:
+      - docker run --name postgres-db -p {{.DB_PORT}}:5432 -e POSTGRES_USER={{.DB_USER}} -e POSTGRES_PASSWORD={{.DB_PASSWORD}} -e POSTGRES_DB={{.DB_NAME}} -d postgres
+    desc: Run PostgreSQL in Docker container
 
   all-checks:
     desc: Run format, vet, lint
