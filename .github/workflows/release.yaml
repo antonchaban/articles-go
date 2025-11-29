@@ -72,5 +72,14 @@ jobs:
         run: |
           echo "${{ secrets.DOCKER_PASSWORD }}" | helm registry login ${{ env.REGISTRY }} --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
           
-          # FIX: Adjusted path to look inside 'helm/' directory since that is where the package is built
-          helm push helm/${{ env.CHART_NAME }}-${{ needs.release-please.outputs.version }}.tgz oci://${{ env.REGISTRY }}/${{ env.DOCKER_ORG }}
+          PKG_FILE=$(find . -name "${{ env.CHART_NAME }}-${{ needs.release-please.outputs.version }}.tgz" -print -quit)
+          
+          if [ -z "$PKG_FILE" ]; then
+            echo "Error: Chart package not found!"
+            echo "Listing all .tgz files for debugging:"
+            find . -name "*.tgz"
+            exit 1
+          fi
+          
+          echo "Found package at: $PKG_FILE"
+          helm push "$PKG_FILE" oci://${{ env.REGISTRY }}/${{ env.DOCKER_ORG }}
