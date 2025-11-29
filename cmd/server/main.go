@@ -12,7 +12,7 @@ import (
 	"github.com/antonchaban/articles-go/internal/services"
 	"github.com/antonchaban/articles-go/pkg/database"
 
-	"go.uber.org/zap" // Import Zap
+	"go.uber.org/zap"
 )
 
 func main() {
