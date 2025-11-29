@@ -1,0 +1,57 @@
+version: '3'
+
+vars:
+  DB_USER: '{{.DB_USER | default "admin"}}'
+  DB_PASSWORD: '{{.DB_PASSWORD | default "admin"}}'
+  VERSION: '{{.VERSION}}'
+  DOCKER_IMAGE_NAME: "antohachaban/articles-go:{{.VERSION}}"
+
+tasks:
+  build:
+    cmds:
+      - docker build . -f ./.Dockerfile -t {{.DOCKER_IMAGE_NAME}}
+    desc: "Build the Docker image"
+
+  run-docker:
+    cmds:
+      - docker run -d -p {{.PORT}}:8080 --name articles-go-container {{.DOCKER_IMAGE_NAME}}
+    vars:
+      PORT: '{{default "8080" .PORT}}'
+    desc: "Run the Docker container, example: task build PORT=8080"
+
+  push-docker:
+    cmds:
+      - docker push {{.DOCKER_IMAGE_NAME}}
+    desc: Push the Docker image to the registry
+
+  format:
+    cmds:
+      - go fmt ./...
+    desc: Format the code
+
+  vet:
+    cmds:
+      - go vet ./...
+    desc: Run go vet to check for issues
+
+  tidy:
+    cmds:
+      - go mod tidy
+    desc: Run go mod tidy to clean up dependencies
+
+  build-go:
+    cmds:
+      - go build -o web.exe ./cmd/server
+    desc: Build the Go source code
+
+  test:
+    cmds:
+      - go test ./...
+    desc: Run all tests
+
+  all-checks:
+    desc: Run format, vet, lint
+    cmds:
+      - task format
+      - task vet
+      - task tidy
