@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	"github.com/antonchaban/articles-go/internal/dto"
-
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -20,13 +19,11 @@ type ArticleService interface {
 	GetByID(ctx context.Context, id uint) (*dto.ArticleResponse, error)
 }
 
-// ArticleHandler handles HTTP requests related to articles.
 type ArticleHandler struct {
 	service ArticleService
 	log     *zap.Logger
 }
 
-// NewArticleHandler creates a new ArticleHandler with the given service and logger.
 func NewArticleHandler(s ArticleService, logger *zap.Logger) *ArticleHandler {
 	return &ArticleHandler{
 		service: s,
