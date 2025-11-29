@@ -73,3 +73,9 @@ tasks:
     desc: "Delete the Helm release"
     cmds:
       - helm delete articles-release
+
+  helm-package:
+    desc: "Package the Helm chart"
+    dir: helm
+    cmds:
+      - helm package .

@@ -1,0 +1,76 @@
+name: Release & Publish
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  REGISTRY: docker.io
+  DOCKER_ORG: antohachaban
+  IMAGE_NAME: articles-go
+  CHART_NAME: articles-chart
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      version: ${{ steps.release.outputs.version }}
+    steps:
+      - uses: google-github-actions/release-please-action@v4
+        id: release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          release-type: go
+
+  publish-artifacts:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Task
+        uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build & Push Docker Image (Versioned)
+        run: |
+          IMAGE_TAG="${{ env.REGISTRY }}/${{ env.DOCKER_ORG }}/${{ env.IMAGE_NAME }}:${{ needs.release-please.outputs.version }}"
+          task build DOCKER_IMAGE_NAME="$IMAGE_TAG"
+          task push-docker DOCKER_IMAGE_NAME="$IMAGE_TAG"
+
+      - name: Build & Push Docker Image (Latest)
+        run: |
+          IMAGE_TAG="${{ env.REGISTRY }}/${{ env.DOCKER_ORG }}/${{ env.IMAGE_NAME }}:latest"
+          task build DOCKER_IMAGE_NAME="$IMAGE_TAG"
+          task push-docker DOCKER_IMAGE_NAME="$IMAGE_TAG"
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.12.0
+
+      - name: Package Helm Chart
+        run: task helm-package
+
+      - name: Push Helm Chart to Docker Hub
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | helm registry login ${{ env.REGISTRY }} --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          
+          # FIX: Adjusted path to look inside 'helm/' directory since that is where the package is built
+          helm push helm/${{ env.CHART_NAME }}-${{ needs.release-please.outputs.version }}.tgz oci://${{ env.REGISTRY }}/${{ env.DOCKER_ORG }}
