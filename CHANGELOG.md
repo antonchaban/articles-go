@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/antonchaban/articles-go/compare/v1.0.1...v1.0.2) (2025-11-29)
+
+
+### Bug Fixes
+
+* Nudge release ([#9](https://github.com/antonchaban/articles-go/issues/9)) ([669608d](https://github.com/antonchaban/articles-go/commit/669608d89714f03d935d4d90a636c34e7e74d9ff))
+
 ## [1.0.1](https://github.com/antonchaban/articles-go/compare/v1.0.0...v1.0.1) (2025-11-29)
 
 
