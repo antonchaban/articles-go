@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/antonchaban/articles-go/compare/v1.0.0...v1.0.1) (2025-11-29)
+
+
+### Bug Fixes
+
+* add missing charts ([#5](https://github.com/antonchaban/articles-go/issues/5)) ([cc6ea9f](https://github.com/antonchaban/articles-go/commit/cc6ea9f925777b693aa21832bd46a3720de0f825))
+
 ## 1.0.0 (2025-11-29)
 
 
