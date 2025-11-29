@@ -15,6 +15,7 @@ import (
 	"go.uber.org/zap"
 )
 
+
 func main() {
 	// Load Config
 	cfg, err := config.Load()
