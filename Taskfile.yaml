@@ -11,7 +11,7 @@ vars:
 tasks:
   build:
     cmds:
-      - docker build . -f ./.Dockerfile -t {{.DOCKER_IMAGE_NAME}}
+      - docker build . -f ./Dockerfile -t {{.DOCKER_IMAGE_NAME}}
     desc: "Build the Docker image"
 
   run-docker:
@@ -62,3 +62,14 @@ tasks:
       - task format
       - task vet
       - task tidy
+
+  helm-install:
+    desc: "Install the Helm chart"
+    dir: helm
+    cmds:
+      - helm upgrade --install articles-release . -f values.yaml
+
+  helm-delete:
+    desc: "Delete the Helm release"
+    cmds:
+      - helm delete articles-release

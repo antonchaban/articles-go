@@ -1,0 +1,57 @@
+replicaCount: 1
+
+appEnv: production
+
+image:
+  repository: antohachaban/articles-go
+  pullPolicy: IfNotPresent
+  tag: "0.0.1"
+
+# Secrets for the main application
+secrets:
+  postgresPassword: "supersecretpassword"
+  grafanaPassword: "admin"
+
+service:
+  type: ClusterIP
+  port: 8080
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# default values for dependencies
+
+# PostgreSQL
+postgresql:
+  enabled: true
+  auth:
+    username: postgres
+    password: "supersecretpassword"
+    database: articles
+  primary:
+    persistence:
+      size: 1Gi
+  image:
+    registry: docker.io
+    repository: bitnami/postgresql
+    tag: latest
+  fullnameOverride: "articles-postgres"
+
+# Prometheus & Grafana
+kube-prometheus-stack:
+  enabled: true
+  nodeExporter:
+    enabled: false
+  prometheus:
+    prometheusSpec:
+      serviceMonitorSelectorNilUsesHelmValues: false
+      serviceMonitorSelector: {}
+      serviceMonitorNamespaceSelector: {}
+  grafana:
+    enabled: true
+    adminPassword: "admin"
